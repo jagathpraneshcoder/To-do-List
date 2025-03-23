@@ -69,7 +69,7 @@ app.put("/todos/:id", async (req, res) => {
     );
 
     if (updateTodo.rows.length > 0) {
-      res.json(updateTodo.rows[0]);
+      res.json("Todo is updated");
     } else {
       res.status(404).json({ error: "Todo not found" });
     }
