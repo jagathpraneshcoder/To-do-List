@@ -57,6 +57,28 @@ app.get("/todos/:id",async (req,res)=>{
   }
 })
 
+
+//to update a todo
+app.put("/todos/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { description } = req.body;
+    const updateTodo = await pool.query(
+      "UPDATE todo SET description = $1 WHERE todo_id = $2 RETURNING *",
+      [description, id]
+    );
+
+    if (updateTodo.rows.length > 0) {
+      res.json(updateTodo.rows[0]);
+    } else {
+      res.status(404).json({ error: "Todo not found" });
+    }
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 app.listen(5000, () => {
   console.log("Server is listening on 5000");
 });
