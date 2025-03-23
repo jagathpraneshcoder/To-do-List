@@ -79,6 +79,21 @@ app.put("/todos/:id", async (req, res) => {
   }
 });
 
+//to delete
+app.delete("/todos/:ID",async (req,res)=>{
+  try {
+    const {id} = req.params;
+    const deleteTodo = await pool.query(
+      "DELETE FROM todo WHERE todo_id = $1"
+      ,[id]
+    );
+    res.json("Deleted !");
+  } catch (error) {
+    console.log(error.message);
+    res.sendStatus(400);    
+  }
+})
+
 app.listen(5000, () => {
   console.log("Server is listening on 5000");
 });
