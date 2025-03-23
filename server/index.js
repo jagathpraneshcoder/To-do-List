@@ -57,6 +57,11 @@ app.get("/todos/:id",async (req,res)=>{
   }
 })
 
+//to update a todo
+app.put("/todos/:ID",(req,res)=>{
+
+})
+
 app.listen(5000, () => {
   console.log("Server is listening on 5000");
 });
