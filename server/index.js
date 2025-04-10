@@ -1,121 +1,15 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
-const pool = require("./db");
+
+const todosRouter = require("./routes/todos");
 
 //middleware
-app.use(cors())
-app.use(express.json())
+app.use(cors());
+app.use(express.json());
 
 //routers
-
-//create a todo
-app.post("/todos",async(req,res)=>{
-  
-  try {
-      const {description} = req.body;
-      if (!description) {
-        return res.status(400).json({ error: "Description is required" });
-      }
-
-      const newTodo = await pool.query(
-        "INSERT INTO todo (description) VALUES($1) RETURNING *",
-        [description]
-      );
-  
-      res.status(200).json(newTodo.rows[0]);
-    
-  } catch (error) {
-    console.error(error.message);
-    res.sendStatus(500).json({error:"Server not found"});
-  }
-  
-})
-
-//to get all todo
-app.get("/todos",async (req,res)=>{
-  try {
-    const allTodo = await pool.query("SELECT * FROM todo");
-    res.status(200).json(allTodo.rows);
-  } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ error: "Server error" });
-  }
-});
-
-//to get a todo
-app.get("/todos/:id",async (req,res)=>{
-  try {
-    const {id} = req.params;
-    const todo = await pool.query(
-        "SELECT description FROM todo WHERE todo_id = $1",
-        [id]
-      );
-    if(todo.rows.length > 0){
-      res.json(todo.rows[0]);
-    }
-    else{
-      res.json("description unavailable");
-    }
-  } catch (error) {
-      console.log(error.message);
-      res.status(500).json({ error: "Server error" });
-  }
-})
-
-
-//to update a todo
-app.put("/todos/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    
-    const { description } = req.body;
-    if (!description) {
-      return res.status(400).json({ error: "Description is required" });
-    }
-
-    const todo = await pool.query("SELECT * FROM todo WHERE todo_id = $1", [id]);
-    if (todo.rows.length === 0) {
-      return res.status(404).json({ error: "Todo not found" });
-    }
-    
-    const updateTodo = await pool.query(
-      "UPDATE todo SET description = $1 WHERE todo_id = $2 RETURNING *",
-      [description, id]
-    );
-
-    if (updateTodo.rows.length > 0) {
-      res.json("Todo is updated");
-    } else {
-      res.status(404).json({ error: "Todo not found" });
-    }
-  } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ error: "Server error" });
-  }
-});
-
-//to delete
-app.delete("/todos/:id",async (req,res)=>{
-  try {
-    const { id } = req.params;
-    const todo = await pool.query("SELECT * FROM todo WHERE todo_id = $1", [id]);
-    if (todo.rows.length === 0) {
-      return res.status(404).json({ error: "Todo not found" });
-    }
-
-    const deleteTodo = await pool.query(
-      "DELETE FROM todo WHERE todo_id = $1"
-      ,[id]
-    );
-
-    res.json({ message: "Deleted successfully!" });
-
-  } catch (error) {
-    console.log(error.message);
-    res.sendStatus(400);    
-  }
-})
+app.use("/", todosRouter);
 
 app.listen(5000, () => {
   console.log("Server is listening on 5000");
