@@ -1,49 +1,94 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
+import EditTodo from "./editTodo";
 
-function Button({ jsonData }) {
-  return (
-    <>
-      {jsonData.length > 0 ? (
-        jsonData.map((data) => (
-          <div className="card" style={{ width: "18rem" }} key={data.todo_id}>
-            <img src="client/src/assets/sample.jpeg" className="card-img-top" alt="..." />
-            <div className="card-body">
-              <h5 className="card-title">{data.description}</h5>
-              <a href="#" className="btn btn-primary">Edit</a>
-              <a href="#" className="btn btn-danger">Delete</a>
-            </div>
-          </div>
-        ))
-      ) : (
-        <p>No todos available</p>
-      )}
-    </>
-  );
-}
+function ListTodo(){
 
-function ListTodo() {
-  const [jsonData, setJsonData] = useState([]); // ✅ Initialize as an empty array
+  const [todos,setTodos] = useState([]);
 
-  const getTodo = async () => {
-    try {
-      const response = await fetch("http://localhost:5000/todos");
-      const data = await response.json();
-      setJsonData(data); // ✅ Store array directly
-    } catch (error) {
+  const getTodo = async ()=>{
+    try{
+      const response = await axios.get("http://localhost:5000/todos");
+      const jsonData = response.data;
+      setTodos(jsonData);
+      /*
+        const response = await fetch("http://localhost:5000/todos")
+        const jsonData = reponse.json()
+        console.log(jsonData)
+      */
+    }catch(error){
       console.error(error.message);
-      setJsonData([]); // ✅ Fallback to an empty array
     }
-  };
+  }
 
-  useEffect(() => {
+  useEffect( ()=>{
     getTodo();
-  }, []);
+  },[])
 
-  return (
+  const deleteTodo = async (id)=>{
+    try {
+      const deleteResponse = await axios.delete(`http://localhost:5000/todos/${id}`)
+      /*
+        fetch(`http://localhost:5000/todos/${id}`,{
+          method : "DELETE"
+        });
+      */
+
+      console.log(deleteResponse.data);
+      alert(deleteResponse.data);
+      setTodos( todos.filter( todo=> todo.todo_id !== id));
+    } catch (error) {
+        console.error(error.message);
+    }
+  }
+
+  return(
     <>
-      {jsonData.length > 0 ? <Button jsonData={jsonData} /> : <p>Loading...</p>}
+      <table class="table mt-5 text-center">
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th>Edit</th>
+            <th>Delete</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+          todos.map(todo=>(
+                  <tr key={todo.todo_id}>
+                    <td>{todo.description}</td>
+                    <td>
+                      <EditTodo key={todo.todo_id} todo={todo}/>
+                    </td>
+                    <td><button className="btn btn-danger" onClick={()=>deleteTodo(todo.todo_id)} >Delete</button></td>
+                  </tr>
+              )
+            )
+          }
+        </tbody>
+      </table>
     </>
   );
 }
 
 export default ListTodo;
+
+{/* <tbody>
+          <tr>
+            <td>John</td>
+            <td>Doe</td>
+            <td>john@example.com</td>
+          </tr>
+          <tr>
+            <td>Mary</td>
+            <td>Moe</td>
+            <td>mary@example.com</td>
+          </tr>
+          <tr>
+            <td>July</td>
+            <td>Dooley</td>
+            <td>july@example.com</td>
+          </tr>
+        </tbody>
+  */
+}

@@ -3,8 +3,6 @@ const pool = require("../db");
 const createTodo = async (req, res) => {
   try {
     const { description } = req.body;
-    console.log(req.body);
-    console.log(description);
     if (!description) {
       return res.status(400).json({ error: "Description is required" });
     }
@@ -92,7 +90,7 @@ const deleteTodo = async (req, res) => {
 
     await pool.query("DELETE FROM todo WHERE todo_id = $1", [id]);
 
-    res.json({ message: "Deleted successfully!" });
+    res.json("Deleted successfully!");
   } catch (error) {
     console.log(error.message);
     res.status(400).json({ error: "Server error" });
